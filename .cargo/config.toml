@@ -1,0 +1,19 @@
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+#runner = "probe-run --chip STM32WL55JCIx --connect-under-reset -v"
+runner = "probe-rs run --chip STM32WLE5JCIx --connect-under-reset"
+
+[build]
+target = "thumbv7em-none-eabi"
+
+[env]
+DEFMT_LOG = "trace"
+
+[bin]
+test = false
+bench = false
+
+[unstable]
+mtime-on-use = true
+build-std = ["core"]
+build-std-features = ["panic_immediate_abort"]

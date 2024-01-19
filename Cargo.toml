@@ -1,0 +1,85 @@
+[package]
+name = "low-power"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+embassy-sync = { version = "0.5.0", features = [] }
+embassy-executor = { version = "0.5.0", features = [
+    "nightly",
+    "arch-cortex-m",
+    "executor-thread",
+    "integrated-timers",
+] }
+embassy-time = { version = "0.3.0", features = ["tick-hz-32_768"] }
+embassy-futures = { version = "0.1.0", default-features = false }
+embassy-stm32 = { version = "0", optional = true, features = [
+    "time-driver-any",
+    "memory-x",
+    "unstable-pac",
+    "exti",
+    "chrono",
+    "time",
+    "low-power",
+    # "low-power-debug-with-sleep",
+] }
+embassy-embedded-hal = { version = "0" }
+
+
+embassy-hal-internal = { version = "0.1.0", default-features = false }
+embedded-hal-async = "1.0.0"
+embedded-hal = "1.0.0"
+
+defmt = { version = "0.3.5", optional = true }
+defmt-rtt = { version = "0.4", optional = true }
+defmt-serial = { version = "0.7.0", optional = true }
+nb = { version = "^1.1", optional = true }
+
+cortex-m = { version = "0.7.6", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7.3"
+static_cell = "2.0.0"
+futures = { version = "0.3.25", default-features = false, features = [
+    "async-await",
+] }
+
+
+panic-probe = { version = "0.3" }
+# panic-reset = { version = "0.1.1" }
+
+[features]
+default = ["minew"]
+
+nucleo-wl55jc = ["embassy-stm32/stm32wl55jc-cm4", "_stm32"]
+wio-e5 = ["embassy-stm32/stm32wle5jc", "_stm32"]
+minew = ["embassy-stm32/stm32wle5jc", "_stm32"]
+_stm32 = ["embassy-stm32"]
+defmt = [
+    "dep:defmt",
+    "dep:defmt-rtt",
+    "embassy-stm32/defmt",
+    "embassy-time/defmt",
+    "embassy-time/defmt-timestamp-uptime",
+    "embassy-executor/defmt",
+    "embassy-sync/defmt",
+    "embassy-futures/defmt",
+    "panic-probe/print-defmt",
+]
+defmt-serial = ["dep:defmt-serial", "nb", "defmt"]
+
+[patch.crates-io]
+# embassy-sync = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
+# embassy-executor = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
+# embassy-time = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
+# embassy-stm32 = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
+# embassy-futures = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
+# embassy-embedded-hal = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
+# embassy-hal-internal = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
+embassy-sync = { path = "../embassy/embassy-sync" }
+embassy-executor = { path = "../embassy/embassy-executor" }
+embassy-time = { path = "../embassy/embassy-time" }
+embassy-stm32 = { path = "../embassy/embassy-stm32" }
+embassy-futures = { path = "../embassy/embassy-futures" }
+embassy-embedded-hal = { path = "../embassy/embassy-embedded-hal" }
+embassy-hal-internal = { path = "../embassy/embassy-hal-internal" }
