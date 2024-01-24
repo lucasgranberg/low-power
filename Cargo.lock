@@ -103,6 +103,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc"
+version = "3.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86ec7a15cbe22e59248fc7eadb1907dab5ba09372595da4d73dd805ed4417dfe"
+dependencies = [
+ "crc-catalog",
+]
+
+[[package]]
+name = "crc-catalog"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
+
+[[package]]
 name = "critical-section"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -209,6 +224,7 @@ dependencies = [
 [[package]]
 name = "embassy-embedded-hal"
 version = "0.1.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "defmt",
  "embassy-futures",
@@ -225,6 +241,7 @@ dependencies = [
 [[package]]
 name = "embassy-executor"
 version = "0.5.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "cortex-m",
  "critical-section",
@@ -237,7 +254,8 @@ dependencies = [
 
 [[package]]
 name = "embassy-executor-macros"
-version = "0.4.0"
+version = "0.4.1"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -248,6 +266,7 @@ dependencies = [
 [[package]]
 name = "embassy-futures"
 version = "0.1.1"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "defmt",
 ]
@@ -255,6 +274,7 @@ dependencies = [
 [[package]]
 name = "embassy-hal-internal"
 version = "0.1.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "cortex-m",
  "critical-section",
@@ -265,6 +285,7 @@ dependencies = [
 [[package]]
 name = "embassy-net-driver"
 version = "0.2.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "defmt",
 ]
@@ -272,6 +293,7 @@ dependencies = [
 [[package]]
 name = "embassy-stm32"
 version = "0.1.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "bit_field",
  "bxcan",
@@ -283,7 +305,6 @@ dependencies = [
  "defmt",
  "document-features",
  "embassy-embedded-hal",
- "embassy-executor",
  "embassy-futures",
  "embassy-hal-internal",
  "embassy-net-driver",
@@ -313,6 +334,7 @@ dependencies = [
 [[package]]
 name = "embassy-sync"
 version = "0.5.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "cfg-if",
  "critical-section",
@@ -325,6 +347,7 @@ dependencies = [
 [[package]]
 name = "embassy-time"
 version = "0.3.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "cfg-if",
  "critical-section",
@@ -342,6 +365,7 @@ dependencies = [
 [[package]]
 name = "embassy-time-driver"
 version = "0.1.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "document-features",
 ]
@@ -349,10 +373,12 @@ dependencies = [
 [[package]]
 name = "embassy-time-queue-driver"
 version = "0.1.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 
 [[package]]
 name = "embassy-usb-driver"
 version = "0.1.0"
+source = "git+https://github.com/embassy-rs/embassy.git?rev=fb22b46ebb40c16e35c651c0dacf810126856927#fb22b46ebb40c16e35c651c0dacf810126856927"
 dependencies = [
  "defmt",
 ]
@@ -506,6 +532,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "grounded"
+version = "0.2.0"
+source = "git+https://github.com/jamesmunns/grounded.git#4a4acb27fac0ab3559ae9b822c3a8bc42a25cc4d"
+dependencies = [
+ "portable-atomic",
+]
+
+[[package]]
 name = "hash32"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -542,6 +576,7 @@ version = "0.1.0"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
+ "crc",
  "defmt",
  "defmt-rtt",
  "defmt-serial",
@@ -555,9 +590,11 @@ dependencies = [
  "embedded-hal 1.0.0",
  "embedded-hal-async",
  "futures",
+ "grounded",
  "nb 1.1.0",
  "panic-probe",
  "static_cell",
+ "uninit",
 ]
 
 [[package]]
@@ -638,9 +675,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.76"
+version = "1.0.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95fc56cda0b5c3325f5fbbd7ff9fda9e02bb00bb3dac51252d2f1bfa1cb8cc8c"
+checksum = "e2422ad645d89c99f8f3e6b88a9fdeca7fabeac836b1002371c4367c8f984aae"
 dependencies = [
  "unicode-ident",
 ]
@@ -779,6 +816,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 
 [[package]]
+name = "uninit"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "359fdaaabedff944f100847f2e0ea88918d8012fe64baf5b54c191ad010168c9"
+dependencies = [
+ "zerocopy",
+]
+
+[[package]]
 name = "vcell"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -803,4 +849,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de437e2a6208b014ab52972a27e59b33fa2920d3e00fe05026167a1c509d19cc"
 dependencies = [
  "vcell",
+]
+
+[[package]]
+name = "zerocopy"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "74d4d3961e53fa4c9a25a8637fc2bfaf2595b3d3ae34875568a5cf64787716be"
+dependencies = [
+ "zerocopy-derive",
+]
+
+[[package]]
+name = "zerocopy-derive"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ce1b18ccd8e73a9321186f97e46f9f04b778851177567b1975109d26a08d2a6"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
 ]

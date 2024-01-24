@@ -1,30 +1,53 @@
 #![no_std]
 #![no_main]
 #![feature(type_alias_impl_trait)]
+#![feature(maybe_uninit_as_bytes)]
+#![feature(maybe_uninit_slice)]
+use core::ptr::addr_of_mut;
+use cortex_m::asm;
 #[cfg(feature = "defmt")]
 use defmt_rtt as _;
 use embassy_executor::Spawner;
-use embassy_futures::select::select;
 use embassy_stm32::{
     exti::ExtiInput,
     gpio::{Input, Level, Output, Speed},
-    low_power::{stop_ready, Executor, StopMode},
     pac,
     rtc::{Rtc, RtcConfig},
     time::Hertz,
+    Peripherals,
 };
 use embassy_time::Duration;
+use grounded::uninit::GroundedCell;
 use panic_probe as _;
 
 static RTC: static_cell::StaticCell<Rtc> = static_cell::StaticCell::new();
-#[cortex_m_rt::entry]
-fn main() -> ! {
-    Executor::take().run(|spawner| {
-        spawner.spawn(async_main(spawner)).unwrap();
-    });
+const X25: crc::Crc<u8> = crc::Crc::<u8>::new(&crc::CRC_8_AUTOSAR);
+#[derive(Copy, Clone)]
+#[cfg(feature = "defmt")]
+#[derive(defmt::Format)]
+#[repr(C)]
+struct Mac {
+    foo: u32,
+    bar: u8,
+}
+#[derive(PartialEq, Eq, Copy, Clone)]
+#[repr(u32)]
+enum Magic {
+    Used = 0x5e1ec7ed,
+    Primed = 0x7e117a1e,
+}
+#[derive(Copy, Clone)]
+#[repr(C)]
+struct Warm {
+    magic: Magic,
+    mac: Mac,
+    crc: u8,
+}
+extern "C" {
+    static mut WARM_DATA: GroundedCell<Warm>;
 }
 
-#[embassy_executor::task]
+#[embassy_executor::main]
 async fn async_main(_spawner: Spawner) {
     #[cfg(feature = "defmt")]
     defmt::info!("START");
@@ -50,51 +73,111 @@ async fn async_main(_spawner: Spawner) {
         config.enable_debug_during_sleep = cfg!(debug_assertions);
         //config.enable_debug_during_sleep = true;
     }
-    let p = embassy_stm32::init(config);
-    let rtc_config: RtcConfig = RtcConfig {
-        frequency: Hertz(256),
-    };
-    let rtc = Rtc::new(p.RTC, rtc_config);
-    let rtc = RTC.init(rtc);
-    embassy_stm32::low_power::stop_with_rtc(rtc);
-    let mut _en_sensor = Output::new(p.PA0, Level::High, Speed::Low);
-    let mut _sensor = Output::new(p.PB4, Level::Low, Speed::Low);
-    let _scl = Output::new(p.PB7, Level::Low, Speed::Low);
-    let _sda = Output::new(p.PB8, Level::Low, Speed::Low);
-    let mut led = Output::new(p.PB5, Level::Low, Speed::Low);
-    let mut button = ExtiInput::new(Input::new(p.PB6, embassy_stm32::gpio::Pull::Up), p.EXTI6);
-    loop {
-        #[cfg(feature = "defmt")]
-        {
-            defmt::info!("LOOP");
-            defmt::info!("STOP1 READY {}", stop_ready(StopMode::Stop1));
-            defmt::info!("STOP2 READY {}", stop_ready(StopMode::Stop2));
-        }
+    let mut p = embassy_stm32::init(config);
+    embassy_time::Timer::after(Duration::from_millis(1000)).await;
+    #[cfg(feature = "defmt")]
+    defmt::info!("DELAY");
+    embassy_time::Timer::after(Duration::from_millis(1000)).await;
+    do_stuff(&mut p).await.unwrap();
+    standby().await
+}
+async fn standby() -> ! {
+    #[cfg(feature = "defmt")]
+    defmt::info!("STANDBY");
+    pac::FLASH.optr().modify(|v| {
+        v.set_n_rst_stdby(false);
+        v.set_sram2_rst(false);
+    });
+    //PC13 WKUP
+    pac::PWR.scr().write(|w| {
+        w.set_cwuf(0, true);
+        w.set_cwuf(1, true);
+        w.set_cwuf(2, true);
+    });
+    // PA0 en_sensor pull high
+    pac::PWR.pucr(0).modify(|v| v.set_p(0, true));
+    pac::PWR.pdcr(2).modify(|v| v.set_p(13, true));
+    pac::PWR
+        .cr4()
+        .modify(|v| v.set_wp(2, pac::pwr::vals::Wp::RISINGEDGE));
+    pac::PWR.cr3().modify(|v| {
+        v.set_rrs(true);
+        v.set_eulpen(true);
+        v.set_ewup(0, false);
+        v.set_ewup(1, true);
+        v.set_ewup(2, false);
+        v.set_apc(true);
+    });
+    while !pac::PWR.sr2().read().reglps() {}
+    pac::PWR.cr1().modify(|w| {
+        w.set_lpms(pac::pwr::vals::Lpms::STANDBY);
+        w.set_lpr(pac::pwr::vals::Lpr::LOWPOWERMODE);
+    });
+
+    pac::RCC.ahb1enr().modify(|w| w.set_dma1en(false));
+    pac::RCC.ahb1enr().modify(|w| w.set_dma2en(false));
+    pac::RCC.apb1enr1().modify(|w| w.set_rtcapben(false));
+    unsafe {
+        let mut p = cortex_m::Peripherals::steal();
+        cortex_m::peripheral::SCB::set_sleepdeep(&mut p.SCB);
+    }
+    asm::dsb();
+    asm::wfi();
+    asm::isb();
+    unsafe {
+        let mut p = cortex_m::Peripherals::steal();
+        cortex_m::peripheral::SCB::clear_sleepdeep(&mut p.SCB);
+    }
+    cortex_m::peripheral::SCB::sys_reset()
+}
+async fn do_stuff(p: &mut Peripherals) -> Result<(), ()> {
+    let mut led = Output::new(&mut p.PB5, Level::Low, Speed::Low);
+    let warm = get_warm();
+
+    led.set_high();
+    embassy_time::Timer::after(Duration::from_millis(1000)).await;
+    led.set_low();
+    embassy_time::Timer::after(Duration::from_millis(1000)).await;
+    for _ in 0..warm.mac.bar {
         led.set_high();
         embassy_time::Timer::after(Duration::from_millis(100)).await;
         led.set_low();
-
-        let cen = pac::TIM2.cr1().read().cen();
-        pac::TIM2.cr1().modify(|w| w.set_cen(false));
-
-        // let button_fut = button.wait_for_any_edge();
-        let delay_fut = embassy_time::Timer::after(Duration::from_millis(10000));
-        delay_fut.await;
-        // match select(button_fut, delay_fut).await {
-        //     embassy_futures::select::Either::First(_) => {
-        //         #[cfg(feature = "defmt")]
-        //         defmt::info!("BUTTON");
-        //     }
-        //     embassy_futures::select::Either::Second(_) => {
-        //         #[cfg(feature = "defmt")]
-        //         defmt::info!("TIMER");
-        //     }
-        // }
-        pac::TIM2.cr1().modify(|w| w.set_cen(cen));
-        pac::RCC.cr().modify(|w: &mut pac::rcc::regs::Cr| {
-            w.set_hsebyppwr(false);
-            w.set_hseon(true);
-        });
-        while !pac::RCC.cr().read().hserdy() {}
+        embassy_time::Timer::after(Duration::from_millis(100)).await;
     }
+    warm.mac.bar += 1;
+    if warm.mac.bar > 5 {
+        warm.mac.bar = 1;
+    }
+    warm.magic = Magic::Primed;
+    warm.crc = X25.checksum(unsafe { any_as_u8_slice(&warm.mac) });
+    Ok(())
+}
+fn get_warm<'a>() -> &'a mut Warm {
+    unsafe {
+        let warm_data_ptr = WARM_DATA.get();
+        let magic_ptr = addr_of_mut!((*warm_data_ptr).magic);
+        let mac_ptr = addr_of_mut!((*warm_data_ptr).mac);
+        let crc_ptr = addr_of_mut!((*warm_data_ptr).crc);
+        if magic_ptr.read_volatile() != Magic::Primed
+            || crc_ptr.read_volatile()
+                != X25.checksum(::core::slice::from_raw_parts(
+                    mac_ptr as *const u8,
+                    ::core::mem::size_of::<Mac>(),
+                ))
+        {
+            let mac = Mac { foo: 0, bar: 1 };
+            let warm = Warm {
+                magic: Magic::Used,
+                mac,
+                crc: X25.checksum(any_as_u8_slice(&mac)),
+            };
+            (*warm_data_ptr) = warm;
+        }
+        let warm = &mut *warm_data_ptr;
+        warm.magic = Magic::Used;
+        warm
+    }
+}
+unsafe fn any_as_u8_slice<T: Sized>(p: &T) -> &[u8] {
+    ::core::slice::from_raw_parts((p as *const T) as *const u8, ::core::mem::size_of::<T>())
 }

@@ -15,15 +15,13 @@ embassy-executor = { version = "0.5.0", features = [
 ] }
 embassy-time = { version = "0.3.0", features = ["tick-hz-32_768"] }
 embassy-futures = { version = "0.1.0", default-features = false }
-embassy-stm32 = { version = "0", optional = true, features = [
+embassy-stm32 = { version = "*", optional = true, features = [
     "time-driver-any",
     "memory-x",
     "unstable-pac",
     "exti",
     "chrono",
     "time",
-    "low-power",
-    # "low-power-debug-with-sleep",
 ] }
 embassy-embedded-hal = { version = "0" }
 
@@ -48,8 +46,14 @@ futures = { version = "0.3.25", default-features = false, features = [
 panic-probe = { version = "0.3" }
 # panic-reset = { version = "0.1.1" }
 
+grounded = { git = "https://github.com/jamesmunns/grounded.git" }
+uninit = { version = "0.6.2", default-features = false, features = [
+    "zerocopy",
+] }
+crc = "3.0.1"
+
 [features]
-default = ["minew"]
+default = ["minew", "defmt"]
 
 nucleo-wl55jc = ["embassy-stm32/stm32wl55jc-cm4", "_stm32"]
 wio-e5 = ["embassy-stm32/stm32wle5jc", "_stm32"]
@@ -69,17 +73,10 @@ defmt = [
 defmt-serial = ["dep:defmt-serial", "nb", "defmt"]
 
 [patch.crates-io]
-# embassy-sync = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
-# embassy-executor = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
-# embassy-time = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
-# embassy-stm32 = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
-# embassy-futures = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
-# embassy-embedded-hal = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
-# embassy-hal-internal = { git = "https://github.com/lucasgranberg/embassy.git", rev = "21d7a2003bc39c5597f83e21526f73602642e0cf" }
-embassy-sync = { path = "../embassy/embassy-sync" }
-embassy-executor = { path = "../embassy/embassy-executor" }
-embassy-time = { path = "../embassy/embassy-time" }
-embassy-stm32 = { path = "../embassy/embassy-stm32" }
-embassy-futures = { path = "../embassy/embassy-futures" }
-embassy-embedded-hal = { path = "../embassy/embassy-embedded-hal" }
-embassy-hal-internal = { path = "../embassy/embassy-hal-internal" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy.git", rev = "fb22b46ebb40c16e35c651c0dacf810126856927" }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "fb22b46ebb40c16e35c651c0dacf810126856927" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "fb22b46ebb40c16e35c651c0dacf810126856927" }
+embassy-stm32 = { git = "https://github.com/embassy-rs/embassy.git", rev = "fb22b46ebb40c16e35c651c0dacf810126856927" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy.git", rev = "fb22b46ebb40c16e35c651c0dacf810126856927" }
+embassy-embedded-hal = { git = "https://github.com/embassy-rs/embassy.git", rev = "fb22b46ebb40c16e35c651c0dacf810126856927" }
+embassy-hal-internal = { git = "https://github.com/embassy-rs/embassy.git", rev = "fb22b46ebb40c16e35c651c0dacf810126856927" }
