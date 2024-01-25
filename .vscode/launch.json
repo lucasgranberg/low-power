@@ -14,8 +14,8 @@
             "runtimeArgs": [
                 "debug"
             ],
-            "chip": "STM32WLE5JCIx",
-            //"chip": "STM32WLE5CCUx",
+            //"chip": "STM32WLE5JCIx",
+            "chip": "STM32WLE5CCUx",
             //"chip": "STM32WL55JCIx",
             "flashingConfig": {
                 "flashingEnabled": true,
@@ -26,12 +26,25 @@
                 {
                     "coreIndex": 0,
                     "programBinary": "${workspaceFolder}/target/thumbv7em-none-eabi/debug/low-power",
-                    "svdFile": "${workspaceFolder}/STM32WLE5_CM4.svd",
-                    "rttEnabled": true
+                    "svdFile": "${workspaceFolder}/stm32wle5.svd",
+                    "rttEnabled": true,
+                    "rttChannelFormats": [
+                        {
+                            "channelNumber": 0,
+                            // Format RTT data as String data
+                            "dataFormat": "Defmt",
+                            // Include host-side timestamps for every line of data transferred from the target RTT output
+                            "showTimestamps": true
+                        }
+                    ]
                 }
             ],
             "consoleLogLevel": "Debug", //Error, Warn, Info, Debug, Trace 
-            "preLaunchTask": "${defaultBuildTask}"
+            "preLaunchTask": "${defaultBuildTask}",
+            "env": {
+                //!MODIFY: Remove or use any of the supported DEFMT_LOG options.
+                "DEFMT_LOG": "info"
+            }
         }
     ]
 }

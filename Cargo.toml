@@ -37,7 +37,6 @@ nb = { version = "^1.1", optional = true }
 
 cortex-m = { version = "0.7.6", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7.3"
-static_cell = "2.0.0"
 futures = { version = "0.3.25", default-features = false, features = [
     "async-await",
 ] }
@@ -47,9 +46,6 @@ panic-probe = { version = "0.3" }
 # panic-reset = { version = "0.1.1" }
 
 grounded = { git = "https://github.com/jamesmunns/grounded.git" }
-uninit = { version = "0.6.2", default-features = false, features = [
-    "zerocopy",
-] }
 crc = "3.0.1"
 
 [features]
